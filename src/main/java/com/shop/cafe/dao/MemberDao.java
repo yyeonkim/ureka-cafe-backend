@@ -3,6 +3,8 @@ package com.shop.cafe.dao;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
@@ -36,6 +38,29 @@ public class MemberDao {
 			pstmt.setString(3, member.getPwd());
 			int i = pstmt.executeUpdate();
 			System.out.println(i + "행이 생성되었습니다.");
+		}
+	}
+	
+	public Member login(Member m) throws Exception {
+		Class.forName(DB_DRIVER);
+		
+		String sql = "SELECT nickname FROM member WHERE email = ? AND pwd = ?";
+		
+		try(
+			Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PW);
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+		) {
+			pstmt.setString(1, m.getEmail());
+			pstmt.setString(2, m.getPwd());
+			ResultSet rs = pstmt.executeQuery();
+			
+			if (rs.next()) {
+				String nickname = rs.getString("nickname");
+				m.setNickname(nickname);
+				return m;
+			} else {
+				return null;
+			}
 		}
 	}
 }
